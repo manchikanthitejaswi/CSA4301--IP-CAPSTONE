@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Online Bus Ticket Reservation</title>
+ <style>
+ body {
+   font-family: Arial, sans-serif;
+   background-color: #f4f4f4;
+   margin: 0;
+   padding: 0;
+   text-align: center;
+ }
+ .container {
+   margin-top: 50px;
+ }
+ a, button {
+   text-decoration: none;
+   display: inline-block;
+   margin: 20px;
+   padding: 15px 30px;
+   background-color: #007bff;
+   color: white;
+   border-radius: 5px;
+   font-size: 18px;
+   border: none;
+   cursor: pointer;
+ }
+ a:hover, button:hover {
+   background-color: #0056b3;
+ }
+ .section {
+   display: none;
+   margin-top: 50px;
+ }
+ .active {
+   display: block;
+ }
+ .login-container,
+ .search-container,
+ .bus-selection-container,
+ .payment-container,
+ .ticket-container,
+ .seat-selection-container {
+   background-color: #ffffff;
+   padding: 20px;
+   border-radius: 8px;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+   width: 400px;
+   margin: auto;
+   text-align: left;
+ }
+ .login-container input,
+ .search-container select,
+ .payment-container input {
+   width: 100%;
+   padding: 10px;
+   margin: 10px 0;
+   border: 1px solid #ccc;
+   border-radius: 4px;
+ }
+ .login-container input[type="submit"],
+ .payment-container input[type="submit"] {
+   background-color: #28a745;
+   color: white;
+   cursor: pointer;
+ }
+ .register,
+ .login-link {
+   margin-top: 20px;
+   color: #007bff;
+   cursor: pointer;
+ }
+ .bus {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin-bottom: 20px;
+   padding: 15px;
+   border: 1px solid #ddd;
+   border-radius: 8px;
+   background-color: #ffffff;
+ }
+ .bus.selected {
+   background-color: #e0f7fa;
+ }
+ .bus img {
+   max-width: 100px;
+   border-radius: 8px;
+ }
+ .bus-info {
+   text-align: left;
+   flex: 1;
+   padding: 0 15px;
+ }
+ .seat-grid {
+   display: grid;
+   grid-template-columns: repeat(4, 50px);
+   grid-gap: 10px;
+   justify-content: center;
+   margin: 20px 0;
+ }
+ .seat {
+   width: 50px;
+   height: 50px;
+   background-color: #ddd;
+   border: 1px solid #ccc;
+   text-align: center;
+   line-height: 50px;
+   cursor: pointer;
+   border-radius: 5px;
+ }
+ .seat.selected {
+   background-color: #28a745;
+   color: white;
+ }
+ .seat.occupied {
+   background-color: #f44336;
+   cursor: not-allowed;
+ }
+ .bus-selection {
+   width: 100%;
+   padding: 10px;
+   background-color: #007bff;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+ }
+ #total-fare {
+   font-size: 20px;
+   font-weight: bold;
+   margin-top: 20px;
+ }
+ </style>
+</head>
+<body>
+<div class="container active" id="home">
+ <h1>Welcome to Online Bus Ticket Reservation</h1>
+ <button onclick="showSection('login')">Login</button>
+ <button onclick="showSection('search')">Search Buses</button>
+</div>
+<div class="section" id="login">
+ <div class="login-container">
+   <h2>Login</h2>
+   <form onsubmit="showSection('search'); return false;">
+     <input type="text" id="username" name="username" placeholder="Username" required><br>
+     <input type="password" id="password" name="password" placeholder="Password" required><br>
+     <input type="submit" value="Login">
+   </form>
+   <div class="register" onclick="showSection('home')">Back to Home</div>
+ </div>
+</div>
+<div class="section" id="search">
+ <div class="search-container">
+   <h2>Search Buses</h2>
+   <form onsubmit="showSection('bus-selection'); displayBusOptions(); return false;">
+     <label for="from">From:</label>
+     <select id="from" name="from" required>
+       <option value="" disabled selected>Select departure location</option>
+       <option value="New York">New York</option>
+       <option value="Los Angeles">Los Angeles</option>
+       <option value="Chicago">Chicago</option>
+       <option value="Houston">Houston</option>
+       <option value="Phoenix">Phoenix</option>
+       <option value="San Francisco">San Francisco</option>
+     </select>
+
+     <label for="to">To:</label>
+     <select id="to" name="to" required>
+       <option value="" disabled selected>Select destination</option>
+       <option value="Miami">Miami</option>
+       <option value="Atlanta">Atlanta</option>
+       <option value="Boston">Boston</option>
+       <option value="Seattle">Seattle</option>
+       <option value="Denver">Denver</option>
+       <option value="Dallas">Dallas</option>
+     </select>
+
+     <label for="date">Date of Travel:</label>
+     <input type="date" id="date" name="date" required>
+
+     <label for="bus-type">Bus Type:</label>
+     <select id="bus-type" name="bus-type" required>
+       <option value="AC">AC</option>
+       <option value="Non-AC">Non-AC</option>
+       <option value="Sleeper">Sleeper</option>
+       <option value="Semi-Sleeper">Semi-Sleeper</option>
+     </select>
+
+     <input type="submit" value="Search">
+   </form>
+   <div class="login-link" onclick="showSection('home')">Back to Home</div>
+ </div>
+</div>
+<div class="section" id="bus-selection">
+ <div class="bus-selection-container">
+   <h2>Select a Bus</h2>
+   <div id="bus-options">
+     <!-- Bus options will be dynamically populated here -->
+   </div>
+   <div class="login-link" onclick="showSection('search')">Back to Search</div>
+ </div>
+</div>
+<div class="section" id="seat-selection">
+ <div class="seat-selection-container">
+   <h2>Select Seats</h2>
+   <div id="seat-grid" class="seat-grid"></div>
+   <p id="total-fare">Total Fare: $0</p>
+   <button class="bus-selection" onclick="showSection('payment')">Proceed to Payment</button>
+ </div>
+</div>
+<div class="section" id="payment">
+ <div class="payment-container">
+   <h2>Payment Details</h2>
+   <form onsubmit="confirmTicket(); return false;">
+     <label for="name">Cardholder Name:</label>
+     <input type="text" id="name" name="name" placeholder="Enter your name" required>
+
+     <label for="card-number">Card Number:</label>
+     <input type="number" id="card-number" name="card-number" placeholder="Enter your card number" required>
+
+     <label for="expiry">Expiry Date:</label>
+     <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
+
+     <label for="cvv">CVV:</label>
+     <input type="number" id="cvv" name="cvv" placeholder="Enter CVV" required>
+
+     <input type="submit" value="Make Payment">
+   </form>
+ </div>
+</div>
+<div class="section" id="ticket">
+ <div class="ticket-container">
+   <h2>Ticket Confirmation</h2>
+   <p id="ticket-details"></p>
+   <button onclick="showSection('home')">Go to Home</button>
+ </div>
+</div>
+<script>
+ function showSection(sectionId) {
+   const sections = document.querySelectorAll('.section');
+   sections.forEach(section => section.classList.remove('active'));
+   document.getElementById(sectionId).classList.add('active');
+   if (sectionId !== 'home') {
+     document.getElementById('home').classList.remove('active');
+   } else {
+     document.getElementById('home').classList.add('active');
+   }
+ }
+
+ function displayBusOptions() {
+   const buses = [
+     { name: "Express Line 101", company: "Fast Travel", fare: 50, seats: 10, time: "10:00 AM", image: "https://via.placeholder.com/100?text=Bus+1" },
+     { name: "City Connect 202", company: "City Travel", fare: 40, seats: 5, time: "1:00 PM", image: "https://via.placeholder.com/100?text=Bus+2" },
+     { name: "Night Rider 303", company: "Night Express", fare: 60, seats: 20, time: "9:00 PM", image: "https://via.placeholder.com/100?text=Bus+3" },
+     { name: "Comfort Cruiser 404", company: "Luxury Tours", fare: 80, seats: 15, time: "8:00 AM", image: "https://via.placeholder.com/100?text=Bus+4" },
+     { name: "Rapid Route 505", company: "Quick Move", fare: 30, seats: 25, time: "3:00 PM", image: "https://via.placeholder.com/100?text=Bus+5" }
+   ];
+
+   const busOptions = document.getElementById('bus-options');
+   busOptions.innerHTML = '';
+
+   buses.forEach(bus => {
+     const busElement = document.createElement('div');
+     busElement.classList.add('bus');
+     busElement.innerHTML = `
+       <img src="${bus.image}" alt="Bus Image">
+       <div class="bus-info">
+         <strong>Bus Name:</strong> ${bus.name}<br>
+         <strong>Company:</strong> ${bus.company}<br>
+         <strong>Fare:</strong> $${bus.fare}<br>
+         <strong>Seats Available:</strong> ${bus.seats}<br>
+         <strong>Time:</strong> ${bus.time}
+       </div>
+       <button class="bus-selection" onclick="selectBus('${bus.name}', ${bus.fare}, ${bus.seats}, '${bus.time}')">Select</button>
+     `;
+     busOptions.appendChild(busElement);
+   });
+ }
+
+ function selectBus(name, fare, seats, time) {
+   alert(`You selected ${name} with fare $${fare}, ${seats} seats available, and timing ${time}.`);
+   localStorage.setItem('selectedBus', JSON.stringify({ name, fare, seats, time }));
+   generateSeatGrid(seats);
+   showSection('seat-selection');
+ }
+
+ function generateSeatGrid(totalSeats) {
+   const seatGrid = document.getElementById('seat-grid');
+   seatGrid.innerHTML = '';
+   for (let i = 1; i <= totalSeats; i++) {
+     const seat = document.createElement('div');
+     seat.classList.add('seat');
+     seat.textContent = i;
+     seat.onclick = function() {
+       seat.classList.toggle('selected');
+       calculateFare();
+     };
+     seatGrid.appendChild(seat);
+   }
+ }
+
+ function calculateFare() {
+   const selectedSeats = document.querySelectorAll('.seat.selected').length;
+   const selectedBus = JSON.parse(localStorage.getItem('selectedBus'));
+   const totalFare = selectedSeats * selectedBus.fare;
+   document.getElementById('total-fare').textContent = `Total Fare: $${totalFare}`;
+ }
+
+ function confirmTicket() {
+   const from = document.getElementById('from').value;
+   const to = document.getElementById('to').value;
+   const date = document.getElementById('date').value;
+   const busType = document.getElementById('bus-type').value;
+   const selectedBus = JSON.parse(localStorage.getItem('selectedBus'));
+
+   const selectedSeats = Array.from(document.querySelectorAll('.seat.selected')).map(seat => seat.textContent);
+   const totalFare = selectedSeats.length * selectedBus.fare;
+
+   const ticketDetails = `
+     <strong>From:</strong> ${from}<br>
+     <strong>To:</strong> ${to}<br>
+     <strong>Date of Travel:</strong> ${date}<br>
+     <strong>Bus Type:</strong> ${busType}<br>
+     <strong>Bus Name:</strong> ${selectedBus.name}<br>
+     <strong>Fare per Seat:</strong> $${selectedBus.fare}<br>
+     <strong>Total Fare:</strong> $${totalFare}<br>
+     <strong>Seats Selected:</strong> ${selectedSeats.join(', ')}<br>
+     <strong>Bus Timing:</strong> ${selectedBus.time}<br>
+     <strong>Status:</strong> Confirmed
+   `;
+   document.getElementById('ticket-details').innerHTML = ticketDetails;
+
+   showSection('ticket');
+ }
+</script>
+</body>
+</html>
